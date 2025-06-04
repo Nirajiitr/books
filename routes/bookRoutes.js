@@ -33,6 +33,7 @@ router.post('/', authenticated, async (req, res) => {
         const savedBook = await newBook.save();
         res.status(201).json(savedBook);
     } catch (error) {
+        console.error('Error creating book:', error);
         res.status(500).json({ message: 'Error creating book', error: error.message });
     }
 })
