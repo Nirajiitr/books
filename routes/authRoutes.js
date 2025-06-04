@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken';
 
 
 const router = express.Router();
-const generateToken = (userId) => {
-    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '17d' });
-    return token;
+const generateToken = ({ userId, username, email }) => {
+    const token = jwt.sign({ id: userId, username, email }, process.env.JWT_SECRET, { expiresIn: '17d' });
+    return token;   
 }
 router.post('/register', async(req, res) => {
     try {
@@ -37,7 +37,7 @@ router.post('/register', async(req, res) => {
             profilePicture: profilePicture || "https://example.com/default-profile.png", // Default profile picture
         })
         await newUser.save();
-        const token = generateToken(newUser._id);
+        const token = generateToken({userId: newUser._id, username: newUser.username, email: newUser.email});
         res.status(201).json({
             message: 'User registered successfully',
             user: {

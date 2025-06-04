@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import connectDB from './lib/db.js';
 import authRoutes from './routes/authRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 import job from './lib/cron.js';
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
   
   app.use('/api/auth', authRoutes);
   app.use('/api/book',bookRoutes); 
+  app.use('/api/upload', uploadRoutes);
 
 
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,14 +1,14 @@
 import express from 'express';
 import Book from '../models/Book.js';
-import cloudinary from '../lib/cloudinary.js';
+
 import authenticated from '../middleware/authenticated.js';
 
 
 const router = express.Router();
 
 router.post('/', authenticated, async (req, res) => {
-    const { title, author, description, user, publishedDate, pageCount, coverImage, ratings } = req.body;
-    
+    const { title, description, publishedDate, pageCount, coverImage, ratings } = req.body;
+      
     try {
        
         let coverImageUrl = coverImage;
@@ -18,10 +18,10 @@ router.post('/', authenticated, async (req, res) => {
         });
         coverImageUrl = uploadResponse.secure_url;
         }
-    
+        
         const newBook = new Book({
         title,
-        author,
+        author: req.user.username, 
         description,
         user : req.user._id, 
         publishedDate,
@@ -29,7 +29,7 @@ router.post('/', authenticated, async (req, res) => {
         coverImage: coverImageUrl,
         ratings,
         });
-    
+
         const savedBook = await newBook.save();
         res.status(201).json(savedBook);
     } catch (error) {
