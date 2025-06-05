@@ -63,6 +63,13 @@ router.get("/", authenticated, async (req, res) => {
   }
 });
 // delete book by id
+function extractPublicId(secureUrl) {
+  const url = new URL(secureUrl);
+  const parts = url.pathname.split('/');
+  const folderAndFilename = parts.slice(parts.indexOf('upload') + 1).join('/'); 
+  const publicId = folderAndFilename.replace(/\.[^/.]+$/, ""); 
+  return publicId; 
+}
 router.delete("/:id", authenticated, async (req, res) => {
   const { id } = req.params;
 
@@ -80,24 +87,29 @@ router.delete("/:id", authenticated, async (req, res) => {
       return res
         .status(403)
         .json({ message: "You are not authorized to delete this book" });
-    }
+      }
 
-    // delete cover image from cloudinary
-    if (book.coverImage) {
-      const publicId = book.coverImage.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(`books/${publicId}`);
-    }
+   if (book.coverImage) {
+  const publicId = extractPublicId(book.coverImage);
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+    console.warn("Failed to delete Cloudinary image:", err.message);
+  }
+}
+
 
     await Book.findByIdAndDelete(id);
     res.status(200).json({ message: "Book deleted successfully" });
   } catch (error) {
-    console.error("Error deleting book:", error); // <-- add this for logs
+    console.error("Error deleting book:", error); 
     res
       .status(500)
       .json({ message: "Error deleting book", error: error.message });
   }
 });
 // update book by id
+
 router.put("/:id", authenticated, async (req, res) => {
   const { id } = req.params;
   const {
