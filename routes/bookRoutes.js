@@ -34,7 +34,6 @@ router.post("/", authenticated, async (req, res) => {
       .json({ message: "Error creating book", error: error.message });
   }
 });
-// get 5 books by 5 books as scrolling
 router.get("/", authenticated, async (req, res) => {
   const { page = 1, limit = 5 } = req.query;
   const skip = (page - 1) * limit;
@@ -44,7 +43,7 @@ router.get("/", authenticated, async (req, res) => {
       .skip(skip)
       .limit(Number(limit))
       .sort({ createdAt: -1 })
-      .populate("user", "username profilePicture"); // Populate user details
+      .populate("user", "username profilePicture"); 
     if (books.length === 0) {
       return res.status(404).json({ message: "No books found" });
     }
@@ -140,12 +139,12 @@ router.put("/:id", authenticated, async (req, res) => {
   }
 });
 // get recommended books by user
-router.get("/recommended", authenticated, async (req, res) => {
+router.get("/user/recommended", authenticated, async (req, res) => {
   try {
     const books = await Book.find({ user: req.user._id })
       .sort({ createdAt: -1 })
-      .limit(5)
-      .populate("user", "username profilePicture"); // Populate user details
+      .limit(5);
+      
 
     if (books.length === 0) {
       return res.status(404).json({ message: "No recommended books found" });
