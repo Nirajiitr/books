@@ -78,7 +78,7 @@ router.delete("/:id", authenticated, async (req, res) => {
     // delete cover image from cloudinary
     if (book.coverImage) {
       const publicId = book.coverImage.split("/").pop().split(".")[0]; // Extract public ID from URL
-      await cloudinary.uploader.destroy(`bookworm/covers/${publicId}`);
+      await cloudinary.uploader.destroy(`books/${publicId}`);
     }
 
     await Book.findByIdAndDelete(id);
