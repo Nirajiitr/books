@@ -66,10 +66,16 @@ router.get("/", authenticated, async (req, res) => {
 function extractPublicId(secureUrl) {
   const url = new URL(secureUrl);
   const parts = url.pathname.split('/');
-  const folderAndFilename = parts.slice(parts.indexOf('upload') + 1).join('/'); 
-  const publicId = folderAndFilename.replace(/\.[^/.]+$/, ""); 
-  return publicId; 
+  const uploadIndex = parts.indexOf('upload');
+  if (uploadIndex === -1) return null;
+
+  const rest = parts.slice(uploadIndex + 1);
+  const filtered = rest.filter(p => !/^v\d+$/.test(p) && !p.includes(','));
+  const folderAndFilename = filtered.join('/'); 
+
+  return folderAndFilename.replace(/\.[^/.]+$/, ""); 
 }
+
 router.delete("/:id", authenticated, async (req, res) => {
   const { id } = req.params;
 
@@ -108,56 +114,7 @@ router.delete("/:id", authenticated, async (req, res) => {
       .json({ message: "Error deleting book", error: error.message });
   }
 });
-// update book by id
 
-router.put("/:id", authenticated, async (req, res) => {
-  const { id } = req.params;
-  const {
-    title,
-    author,
-    description,
-    publishedDate,
-    pageCount,
-    coverImage,
-    ratings,
-  } = req.body;
-
-  try {
-    const book = await Book.findById(id);
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-
-    if (book.user.toString() !== req.user._id.toString()) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to update this book" });
-    }
-
-    let coverImageUrl = book.coverImage;
-    if (coverImage) {
-      const uploadResponse = await cloudinary.uploader.upload(coverImage, {
-        folder: "bookworm/covers",
-      });
-      coverImageUrl = uploadResponse.secure_url;
-    }
-
-    book.title = title || book.title;
-    book.author = author || book.author;
-    book.description = description || book.description;
-    book.publishedDate = publishedDate || book.publishedDate;
-    book.pageCount = pageCount || book.pageCount;
-    book.coverImage = coverImageUrl;
-    book.ratings = ratings || book.ratings;
-
-    const updatedBook = await book.save();
-    res.status(200).json(updatedBook);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error updating book", error: error.message });
-  }
-});
 // get recommended books by user
 router.get("/user/recommended", authenticated, async (req, res) => {
   try {
