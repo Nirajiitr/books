@@ -64,6 +64,10 @@ router.get("/", authenticated, async (req, res) => {
 router.delete("/:id", authenticated, async (req, res) => {
   const { id } = req.params;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid book ID" });
+  }
+
   try {
     const book = await Book.findById(id);
     if (!book) {
@@ -75,15 +79,17 @@ router.delete("/:id", authenticated, async (req, res) => {
         .status(403)
         .json({ message: "You are not authorized to delete this book" });
     }
+
     // delete cover image from cloudinary
     if (book.coverImage) {
-      const publicId = book.coverImage.split("/").pop().split(".")[0]; // Extract public ID from URL
+      const publicId = book.coverImage.split("/").pop().split(".")[0];
       await cloudinary.uploader.destroy(`books/${publicId}`);
     }
 
     await Book.findByIdAndDelete(id);
     res.status(200).json({ message: "Book deleted successfully" });
   } catch (error) {
+    console.error("Error deleting book:", error); // <-- add this for logs
     res
       .status(500)
       .json({ message: "Error deleting book", error: error.message });
