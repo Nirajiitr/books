@@ -6,17 +6,17 @@ import authenticated from "../middleware/authenticated.js";
 const router = express.Router();
 
 router.post("/", authenticated, async (req, res) => {
-  const { title, description, publishedDate, pageCount, coverImage, ratings } =
+  const { title, description, publishedDate, pageCount, coverImage, ratings, author } =
     req.body;
 
   try {
-    if (!title || !description || !publishedDate || !pageCount || !ratings) {
+    if (!title || !description || !publishedDate || !pageCount || !ratings || !coverImage || !author) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const newBook = new Book({
       title,
-      author: req.user.username,
+      author,
       description,
       user: req.user._id,
       publishedDate,

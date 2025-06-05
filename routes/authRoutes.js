@@ -11,7 +11,7 @@ const generateToken = ({ userId, username, email }) => {
 }
 router.post('/register', async(req, res) => {
     try {
-        const {email, username, password, profilePicture} = req.body;
+        const {email, username, password} = req.body;
         if (!email || !username || !password) {
             return res.status(400).json({ message: 'Email, username, and password are required' });
         }
@@ -34,7 +34,6 @@ router.post('/register', async(req, res) => {
             email,
             username,
             password: hashedPassword,
-            profilePicture: profilePicture || "https://example.com/default-profile.png", // Default profile picture
         })
         await newUser.save();
         const token = generateToken({userId: newUser._id, username: newUser.username, email: newUser.email});
@@ -44,7 +43,6 @@ router.post('/register', async(req, res) => {
                 id: newUser._id,
                 username: newUser.username,
                 email: newUser.email,
-                profilePicture: newUser.profilePicture,
             },
             token: token,
         });
@@ -76,7 +74,6 @@ router.post('/login', async(req, res) => {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                profilePicture: user.profilePicture,
             },
             token: token,
         });

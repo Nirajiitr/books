@@ -31,7 +31,7 @@ const bookSchema = new mongoose.Schema({
   },
     coverImage: {
         type: String,
-        default: "https://example.com/default-cover.png", // Default cover image URL
+        default: "https://example.com/default-cover.png", 
     },
     ratings: {
         type: Number,
